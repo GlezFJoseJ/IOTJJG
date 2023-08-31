@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
+cont=5
 class MyHTTPRequestHandler(BaseHTTPRequestHandler):
     def _set_response(self, content_type="text/plain"):
         self.send_response(200)
@@ -9,7 +10,8 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_response()
-        self.wfile.write("Hello from the server!".encode())
+        respuesta = ("el valor es "+ str(cont))
+        self.wfile.write(respuesta.encode())
 
     def do_POST(self):
         content_length = int(self.headers["Content-Length"])
