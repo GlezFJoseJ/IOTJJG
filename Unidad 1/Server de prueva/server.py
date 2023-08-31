@@ -12,22 +12,35 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         self._set_response()
         respuesta = ("el valor es "+ str(cont))
         self.wfile.write(respuesta.encode())
-
+    
     def do_POST(self):
         content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
+
+        body_json = json.loads(post_data.decode())
+        print(body_json['action'])
 
         # Print the complete HTTP request
         print("\n----- Incoming POST Request -----")
         print(f"Requestline: {self.requestline}")
         print(f"Headers:\n{self.headers}")
         print(f"Body:\n{post_data.decode()}")
+        global cont
+        if(body_json['action']=='ASC'):
+            cont +=1
+        elif(body_json['action']=='DES'):
+            cont -=1
         print("-------------------------------")
-
+        
+        
+        
+            
         # Respond to the client
-        response_data = json.dumps({"message": "Received POST data", "data": post_data.decode()})
+        response_data = json.dumps({"message": "Received POST data", "data": post_data.decode(),"Status":"OK"})
         self._set_response("application/json")
         self.wfile.write(response_data.encode())
+
+
 
 def run_server(server_class=HTTPServer, handler_class=MyHTTPRequestHandler, port=7800):
     server_address = ("", port)
@@ -37,3 +50,4 @@ def run_server(server_class=HTTPServer, handler_class=MyHTTPRequestHandler, port
 
 if __name__ == "__main__":
     run_server()
+
