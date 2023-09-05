@@ -8,27 +8,38 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", content_type)
         self.end_headers()
 
+    #Metodo para estraer la informacion si es que se requiere
     def do_GET(self):
         self._set_response()
-        respuesta = ("Todo en orden :3 \nContador actual: "+ str(cont))
+        #Se crea una variable para despues mandar la informacion.
+                    #Texto extra que agrege   | Informacion del contador en string      Convercion de datos int-String
+        respuesta = ("Todo en orden :3 \n       Contador actual: "+                     str(cont))
+        #La informacion de la variable se pasa a "imprimir" 
         self.wfile.write(respuesta.encode())
     
+    #Metodo para cuando se recive informacion en el servidor
     def do_POST(self):
+        #Proceso inicial que permite la extracion de la informacion recivida.
         content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
         #La informacion es extraida.
         body_json = json.loads(post_data.decode())
 
         # Print the complete HTTP request
+        #Al recivir informacion el servidor manda lo siguiente
         print("\n----- Incoming POST Request -----")
         print(f"Requestline: {self.requestline}")
         print(f"Headers:\n{self.headers}")
         print(f"Body:\n{post_data.decode()}")
+        #Variable para el uso del contador que se modifica segun lo que se mande.
         global cont
+        #If que ve lo que se mando y dependiendo si es ascendente o desendente
         if(body_json['action']=='ASC'):
-            cont +=int(body_json['contador'])
+            #La informacion del contador se actualiza y se agrega |     Se convierte de Texto a Int 
+            cont +=                                                     int(body_json['contador'])
         elif(body_json['action']=='DES'):
-            cont -=int(body_json['contador'])
+            #La informacion del contador se actualiza y se quita |     Se convierte de Texto a Int
+            cont -=                                                    int(body_json['contador'])
         print("-------------------------------")
         
         # Respond to the client
