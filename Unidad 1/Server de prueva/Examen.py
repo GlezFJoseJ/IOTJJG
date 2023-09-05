@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
 cont=0
+cambios=0
 class MyHTTPRequestHandler(BaseHTTPRequestHandler):
     def _set_response(self, content_type="text/plain"):
         self.send_response(200)
@@ -31,15 +32,18 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         print(f"Requestline: {self.requestline}")
         print(f"Headers:\n{self.headers}")
         print(f"Body:\n{post_data.decode()}")
+        global cambios
         #Variable para el uso del contador que se modifica segun lo que se mande.
         global cont
         #If que ve lo que se mando y dependiendo si es ascendente o desendente
         if(body_json['action']=='ASC'):
             #La informacion del contador se actualiza y se agrega |     Se convierte de Texto a Int 
             cont +=                                                     int(body_json['contador'])
+            cambios+=1
         elif(body_json['action']=='DES'):
             #La informacion del contador se actualiza y se quita |     Se convierte de Texto a Int
             cont -=                                                    int(body_json['contador'])
+            cambios+=1
         print("-------------------------------")
         
         # Respond to the client
@@ -53,7 +57,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 def run_server(server_class=HTTPServer, handler_class=MyHTTPRequestHandler, port=7800):
     server_address = ("", port)
     httpd = server_class(server_address, handler_class)
-    print(f"Starting server on port {port} Examen...")
+    print(f"Starting server on port {port} de examen...")
     httpd.serve_forever()
 
 if __name__ == "__main__":
