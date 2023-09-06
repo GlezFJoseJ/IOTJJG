@@ -38,11 +38,11 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
         #If que ve lo que se mando y dependiendo si es ascendente o desendente
         if(body_json['action']=='ASC'):
             #La informacion del contador se actualiza y se agrega |     Se convierte de Texto a Int 
-            cont +=                                                     int(body_json['contador'])
+            cont +=                                                     int(body_json['quantity'])
             cambios+=1
         elif(body_json['action']=='DES'):
             #La informacion del contador se actualiza y se quita |     Se convierte de Texto a Int
-            cont -=                                                    int(body_json['contador'])
+            cont -=                                                    int(body_json['quantity'])
             cambios+=1
         print("-------------------------------")
         
