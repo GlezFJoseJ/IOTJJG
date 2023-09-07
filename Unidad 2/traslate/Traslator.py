@@ -14,6 +14,6 @@ headers = {"content-type": "application/x-www-form-urlencoded", "Accept-Encoding
 
 response = requests.post(url, data=payload, headers=headers)
 
-texto_traducido=response.json()["data"]["translations"][0]["translatedText"]
 print(response.json())
+texto_traducido=response.json()["data"]["translations"][0]["translatedText"]
 print(texto_traducido)
