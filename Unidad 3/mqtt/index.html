@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kirby's Forgotten Land Control Panel</title>
+    <style>
+      body {
+        background-image: url('https://media3.giphy.com/media/l0HlIDueXmcWNTPO0/giphy.gif'); /* Soft pink background */
+        color: #000; /* Black text */
+        font-family: 'Comic Sans MS', cursive, sans-serif; /* Fun font */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align content to the top */
+        height: 100vh;
+        background-position: cover;
+        background-size: 95%;
+      }
+
+      .sectionContainer {
+        background-color: rgba(
+          252,
+          213,
+          228,
+          0.949
+        ); /* Light pink with 0.7 opacity */
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        margin: 10px;
+        padding: 20px;
+        width: 470px;
+        text-align: center;
+      }
+
+      h2,
+      h3 {
+        font-size: 36px;
+        margin-bottom: 8px;
+        margin-top: 8px;
+        text-align: center;
+        color: #ff4081; /* Pink text */
+      }
+
+      .buttonContainer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #onButton {
+        background-color: #ff6f61; /* Kirby pink for "ON" button */
+        border: none;
+        border-radius: 4px;
+        color: #fff; /* White text */
+        cursor: pointer;
+        font-size: 16px;
+        margin: 0 10px;
+        padding: 10px 20px;
+        text-decoration: none;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      #offButton {
+        background-color: #ffcc29; /* Kirby yellow for "OFF" button */
+        border: none;
+        border-radius: 4px;
+        color: #000; /* Black text */
+        cursor: pointer;
+        font-size: 16px;
+        margin: 0 10px;
+        padding: 10px 20px;
+        text-decoration: none;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      #onButton:hover {
+        background-color: #ff4d40; /* Slightly darker pink on hover */
+      }
+
+      #offButton:hover {
+        background-color: #ffac00; /* Slightly darker yellow on hover */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sectionContainer">
+      <h2>Kirby's LED Control Panel</h2>
+      <div class="buttonContainer">
+        <button id="onButton">Activate</button>
+        <button id="offButton">Deactivate</button>
+      </div>
+    </div>
+
+    <div class="sectionContainer">
+      <h3>Counter Value:</h3>
+      <div class="buttonContainer">
+        <h2 id="counter">##</h2>
+      </div>
+    </div>
+
+    <div class="sectionContainer">
+      <h3>Temperature Value:</h3>
+      <div class="buttonContainer">
+        <h2 id="temperature">##</h2>
+      </div>
+    </div>
+
+    <div class="sectionContainer">
+      <h3>Humidity Value:</h3>
+      <div class="buttonContainer">
+        <h2 id="humidity">##</h2>
+      </div>
+    </div>
+    <script src="mqtt.js"></script>
+    <script>
+      const onButton = document.getElementById('onButton');
+      const offButton = document.getElementById('offButton');
+      const body = document.body;
+
+      const url = 'wss://ue91a21d.ala.us-east-1.emqxsl.com:8084/mqtt';
+
+      // Create an MQTT client instance
+      const options = {
+        // Clean session
+        clean: true,
+        connectTimeout: 4000,
+        // Authentication
+        clientId: 'emqxjs_' + Math.random().toString(16).substr(2, 8),
+        username: 'mqtt',
+        password: 'password',
+      };
+
+      const client = mqtt.connect(url, options);
+
+      client.on('connect', function () {
+        console.log('Connected');
+        // Subscribe to a topic
+        client.subscribe('test', function (err) {
+          if (!err) {
+            // Publish a message to a topic
+            console.log('Message is published');
+            client.publish('test', 'Hello mqtt from js');
+          }
+        });
+      });
+
+      // Receive messages
+      client.on('message', function (topic, message) {
+        const translate = message.toString();
+        console.log(translate);
+        let stringArray;
+        if (translate.includes('contador ')) {
+          stringArray = translate.split(/(\s+)/);
+          console.log(stringArray);
+          const contador = document.getElementById('counter');
+          contador.innerText = stringArray[2];
+        }
+        if (translate.includes('temp ')) {
+          stringArray = translate.split(/(\s+)/);
+          console.log(stringArray);
+          const temp = document.getElementById('temperature');
+          temp.innerText = stringArray[2] + ' °C';
+        }
+        if (translate.includes('hum ')) {
+          stringArray = translate.split(/(\s+)/);
+          console.log(stringArray);
+          const humd = document.getElementById('humidity');
+          humd.innerText = stringArray[2] + ' %';
+        }
+      });
+
+      onButton.addEventListener('click', () => {
+        body.style.backgroundImage =
+          "url('https://gifdb.com/images/high/kirby-blowing-air-wcalrq9zfsma8rbs.gif')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = '80%,10%'; // Adjusted background position
+        // Simulate LED deactivation
+        // Simulate LED activation
+        client.publish('test', JSON.stringify({ led: 1 }));
+      });
+
+      offButton.addEventListener('click', () => {
+        body.style.backgroundImage =
+          "url('https://i.pinimg.com/originals/5a/47/a2/5a47a293a2833ecdb5a22835cf21c8e5.gif')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = '80%,10%'; // Adjusted background position
+        // Simulate LED deactivation
+        client.publish('test', JSON.stringify({ led: 0 }));
+      });
+
+      const updateTemperature = () => {
+        client.publish('test', JSON.stringify({ temperature: 1 }));
+      };
+
+      const updateHumidity = () => {
+        client.publish('test', JSON.stringify({ humidity: 1 }));
+      };
+
+      // setInterval(updateCounter, 1000);
+      setInterval(updateTemperature, 5000);
+      setInterval(updateHumidity, 5000);
+    </script>
+  </body>
+</html>
