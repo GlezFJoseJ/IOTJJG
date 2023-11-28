@@ -1,0 +1,150 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-image: url("../img/bg.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    background-color: #333333;
+    padding: 20px;
+    width: 100%;
+  }
+
+  h1 {
+    color: #ff4500;
+    margin: 0;
+  }
+
+  section {
+    display: flex;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #2d2d2d;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #videoBlock {
+    width: 50%;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+  }
+
+  #MControl {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  button {
+    background-color: #ff4500;
+    color: #ffffff;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #d23200;
+  }
+
+  label {
+    color: #ff4500;
+    margin-right: 10px;
+  }
+
+  input[type="range"] {
+    width: 80%;
+    margin-top: 10px;
+  }
+
+  select {
+    padding: 10px;
+    margin-top: 10px;
+  }
+  .derecha {
+display: flex;
+flex-direction: column;
+width: 50%;
+box-sizing: border-box;
+}
+
+#MControl {
+width: 100%;
+display: grid;
+grid-template-columns: repeat(3, 29%); /* Tres columnas iguales */
+grid-gap: 10px; /* Espacio entre los contenedores */
+align-items: center;
+justify-content: center;
+margin: 0;
+}
+
+#MControl > div {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+
+/* Añade los siguientes estilos para que los botones dentro de "controlButton" tengan el mismo tamaño */
+#MControl .controlButton button {
+width: 100%;
+box-sizing: border-box;
+}
+
+/* Añade los siguientes estilos para que los elementos input y select tengan el mismo tamaño */
+#MControl input,
+#MControl select {
+width: 100%;
+box-sizing: border-box;
+padding: 10px;
+margin-top: 10px;
+}
+
+
+.controlButton {
+margin: 5px;
+}
+
+/* Add the following styles to make all the content in "derecha" the same size */
+.derecha > div {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+margin: 10px;
+}
+
+/* Add the following styles to make buttons inside "controlButton" the same size */
+.controlButton button {
+width: 100%;
+box-sizing: border-box;
+}
+
+/* Add the following styles to make the input and select elements the same size */
+.derecha input,
+.derecha select {
+width: 100%;
+box-sizing: border-box;
+padding: 10px;
+margin-top: 10px;
+}

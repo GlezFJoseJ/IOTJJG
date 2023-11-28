@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="Recursos\css\incss.css">
+    <title>Control Panel</title>
+    <style>
+
+    </style>
+  </head>
+    <!-- <body background="Recursos\img\bg.jpg"> -->
+    <body>
+    <header>
+      <h1>Control Panel</h1>
+    </header>
+
+    <section>
+        <audio id="audioPlayer" style="display: none">
+            <source src="Recursos\Sonido\ok.mp3" type="audio/mp3">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
+        <div id="videoBlock">
+          <h2>ESP32 CAM Video Stream</h2>
+          <img id="videoStream" />
+        </div>
+      
+        <div class="derecha">
+            <div id="MControl">
+                <div class="controlButton">
+                    <!-- Add more buttons or content as needed -->
+                  </div>
+                <div class="controlButton">
+                  <button class="playAudioButton" id="forward">Adelante</button>
+                </div>
+                <div class="controlButton">
+                    <!-- Add more buttons or content as needed -->
+                  </div>
+                <div class="controlButton">
+                  <button class="playAudioButton" id="left">Izquierda</button>
+                </div>
+                <div class="controlButton">
+                    <!-- Add more buttons or content as needed -->
+                  </div>
+                <div class="controlButton">
+                  <button class="playAudioButton" id="right">Derecha</button>
+                </div>
+                <div class="controlButton">
+                  <!-- Add more buttons or content as needed -->
+                </div>
+                <div class="controlButton">
+                    <button class="playAudioButton" id="backward">Atras</button>
+                  </div>
+                <div class="controlButton">
+                  <!-- Add more buttons or content as needed -->
+                </div>
+            </div>
+            <div>
+              <label for="slider">Intensidad</label>
+              <input type="range" min="0" max="252" value="0" id="slider" />
+            </div>
+            <div>
+              <label for="quality">Calidad</label>
+              <select id="quality">
+                <option value="4">Baja</option>
+                <option value="6">Media</option>
+                <option value="8">Alta</option>
+              </select>
+            </div>
+        </div>
+      </section>
+      
+
+    <script>
+        const playAudioButtons = document.querySelectorAll('.playAudioButton');
+            playAudioButtons.forEach(button => {
+                button.addEventListener('click', reproducirAudio);
+            });
+
+        
+        
+      const setStream = () => {
+        const video = document.getElementById('videoStream');
+        const videoUrl = 'http://192.168.185.14:81/stream';
+        fetch('http://192.168.185.14/control?var=framesize&val=4');
+
+        video.src = videoUrl;
+      };
+
+      const setLedIntensity = (intensity) => {
+        fetch(`http://192.168.185.14/control?var=led_intensity&val=${intensity}`);
+      };
+
+      document.getElementById('slider').addEventListener('input', (e) => {
+        setLedIntensity(e.target.value);
+      });
+
+      document.getElementById('quality').addEventListener('change', (e) => {
+        fetch(`http://192.168.185.14/control?var=framesize&val=${e.target.value}`);
+      });
+
+      setStream();
+
+      const movRequest = (mov) => {
+        fetch(`http://192.168.185.110/carro?mov=${mov}&time=500`);
+      };
+
+      document.getElementById('forward').addEventListener('click', () => movRequest('adelante'));
+      document.getElementById('backward').addEventListener('click', () => movRequest('atras'));
+      document.getElementById('left').addEventListener('click', () => movRequest('izquierda'));
+      document.getElementById('right').addEventListener('click', () => movRequest('derecha'));
+      // Función de reproducción de audio
+      function reproducirAudio() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.play().catch(error => {
+            console.error('Error al reproducir audio:', error);
+            });
+        }
+    </script>
+  </body>
+</html>
