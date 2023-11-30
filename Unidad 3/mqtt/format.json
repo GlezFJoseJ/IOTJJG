@@ -1,0 +1,22 @@
+[{
+    "from": "ESP32",
+    "to": "server",
+    "action": "SEND_DATA",
+    "data": {
+        "temperature": 22.5,
+        "humidity": 64.1
+    }
+},
+{
+    "from": "web",
+    "to": "server",
+    "action": "GET_DATA"
+},
+{
+    "from": "esp32",
+    "to": "broadcast",
+    "action": "UPDATE_COUNTER",
+    "value": 1
+}
+
+]

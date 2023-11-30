@@ -35,20 +35,70 @@
         font-family: monospace;
         margin: 10px;
       }
+
+      #line-chart {
+        display: block;
+        margin: auto;
+        max-width: 80vw;
+        max-height: 80vh;
+      }
     </style>
   </head>
   <body>
     <h1>MQTT CON JS</h1>
     <button id="toggle" class="led_on">Apagar led</button>
-    <p>Contador</p>
-    <p id="contador_value"></p>
+    <button id="fetch_data" class="led_on">Solicitar datos</button>
     <input type="text" id="msgMQTT" />
+    <p id="counter_display">Esperando...</p>
     <p id="output_console"></p>
+    <canvas id="line-chart" width="800" height="450"> </canvas>
     <!-- Toggle button for sending JSON -->
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    let step = 10; // Puedes ajustar el valor del paso según tus necesidades
+    let labels = Array.from({ length: 24 }, (_, i) => i * step); // Crear etiquetas de tiempo con un paso
+
+    let temperatures = [86, 114, 106, 106, 107, 111, 133, 221, 783, 2478]; // Datos de temperatura (ajusta la cantidad según tus necesidades)
+    let humidities = [282, 350, 411, 502, 635, 809, 947, 1402, 3700, 5267]; // Datos de humedad (ajusta la cantidad según tus necesidades)
+
+    let chart = new Chart(document.getElementById('line-chart'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: temperatures,
+            label: 'Humedad',
+            borderColor: '#3e95cd',
+            fill: false,
+          },
+          {
+            data: humidities,
+            label: 'Temperatura',
+            borderColor: '#8e5ea2',
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'Temperatura y Humedad en la última hora',
+        },
+      },
+    });
+
+    function updateChart(labels, temperatures, humidities) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = temperatures;
+      chart.data.datasets[1].data = humidities;
+      chart.update();
+    }
+  </script>
   <script src="mqtt.js"></script>
   <script>
-    let PUB_TOPIC = 'monitores/web_BACANO';
+    let PUB_TOPIC = 'monitores/web';
     let msgMQTT = document.getElementById('msgMQTT');
     let output_console = document.getElementById('output_console');
     msgMQTT.addEventListener('keyup', (e) => {
@@ -70,6 +120,17 @@
         toggle.innerHTML = 'Apagar led';
         client.publish(PUB_TOPIC, JSON.stringify({ led: 1 }));
       }
+    });
+
+    document.getElementById('fetch_data').addEventListener('click', (e) => {
+      client.publish(
+        PUB_TOPIC,
+        JSON.stringify({
+          from: 'web',
+          to: 'server',
+          action: 'GET_DATA',
+        })
+      );
     });
 
     /***
@@ -110,8 +171,25 @@
       // message is Buffer
       output_console.innerHTML =
         message.toString() + '<br>' + output_console.innerHTML;
-      // client.end();
-      console.log(message);
+      try {
+        let data = JSON.parse(message.toString());
+        if (data['from'] == 'server' && data['to'] == 'web') {
+          updateChart(
+            data['data']['labels'],
+            data['data']['temperatures'],
+            data['data']['humidities']
+          );
+        } else if (
+          data['from'] == 'esp32' &&
+          data['to'] == 'broadcast' &&
+          data['action'] == 'UPDATE_COUNTER'
+        ) {
+          document.getElementById('counter_display').innerHTML =
+            'Contador: ' + data['value'];
+        }
+      } catch (e) {
+        console.log('No es un JSON');
+      }
     });
   </script>
 </html>

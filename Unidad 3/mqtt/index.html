@@ -36,6 +36,26 @@
         text-align: center;
       }
 
+      .sectionJoke {
+        background-color: rgba(
+          252,
+          213,
+          228,
+          0.944
+        ); /* Light pink with 0.7 opacity */
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        margin: 10px;
+        padding: 10px 0;
+        width: 80%;
+        text-align: center;
+        color: #ff4081; /* Pink text */
+      }
+
+      .sectionJoke p {
+        margin: 0;
+      }
+
       h2,
       h3 {
         font-size: 36px;
@@ -52,7 +72,8 @@
         justify-content: center;
       }
 
-      #onButton {
+      #onButton,
+      .ledButton {
         background-color: #ff6f61; /* Kirby pink for "ON" button */
         border: none;
         border-radius: 4px;
@@ -78,132 +99,296 @@
         transition: background-color 0.3s, color 0.3s;
       }
 
-      #onButton:hover {
+      #onButton:hover,
+      .ledButton:hover {
         background-color: #ff4d40; /* Slightly darker pink on hover */
       }
 
       #offButton:hover {
         background-color: #ffac00; /* Slightly darker yellow on hover */
       }
+
+      #line-chart {
+        display: block;
+        margin: auto;
+        max-width: 80%;
+        /* max-height: 80vh; */
+      }
+
+      header,
+      .values_container,
+      .chart_container {
+        width: 80vw;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      header .sectionContainer {
+        width: 100%;
+      }
+
+      .values_container {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+      }
+
+      .values_container .sectionContainer {
+        width: 32%t;
+      }
+
+      .values_container h3 {
+        font-size: 1.8rem;
+      }
+
+      .values_container h2 {
+        font-size: 1.7rem;
+      }
+
+      .chart_container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .chart_container .sectionContainer {
+        width: 100%;
+      }
+
+      #line-chart {
+        min-height: 350px;
+      }
     </style>
   </head>
   <body>
-    <div class="sectionContainer">
-      <h2>Kirby's LED Control Panel</h2>
-      <div class="buttonContainer">
-        <button id="onButton">Activate</button>
-        <button id="offButton">Deactivate</button>
+    <div class="sectionJoke">
+      <p id="joke">Loading...</p>
+    </div>
+    <header>
+      <div class="sectionContainer">
+        <h2>Kirby's Control Panel</h2>
+        <div class="buttonContainer">
+          <button id="onButton">Activate</button>
+          <button id="offButton">Deactivate</button>
+          <button id="fetch_data" class="ledButton">Solicitar datos</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="values_container">
+      <div class="sectionContainer">
+        <h3>Counter Value:</h3>
+        <div class="buttonContainer">
+          <h2 id="counter">...</h2>
+        </div>
+      </div>
+
+      <div class="sectionContainer">
+        <h3>Temperature Value:</h3>
+        <div class="buttonContainer">
+          <h2 id="temperature">...</h2>
+        </div>
+      </div>
+
+      <div class="sectionContainer">
+        <h3>Humidity Value:</h3>
+        <div class="buttonContainer">
+          <h2 id="humidity">...</h2>
+        </div>
       </div>
     </div>
 
-    <div class="sectionContainer">
-      <h3>Counter Value:</h3>
-      <div class="buttonContainer">
-        <h2 id="counter">##</h2>
+    <div class="chart_container">
+      <div class="sectionContainer">
+        <canvas id="line-chart" width="800" height="450"> </canvas>
       </div>
     </div>
-
-    <div class="sectionContainer">
-      <h3>Temperature Value:</h3>
-      <div class="buttonContainer">
-        <h2 id="temperature">##</h2>
-      </div>
-    </div>
-
-    <div class="sectionContainer">
-      <h3>Humidity Value:</h3>
-      <div class="buttonContainer">
-        <h2 id="humidity">##</h2>
-      </div>
-    </div>
-    <script src="mqtt.js"></script>
-    <script>
-      const onButton = document.getElementById('onButton');
-      const offButton = document.getElementById('offButton');
-      const body = document.body;
-
-      const url = 'wss://ue91a21d.ala.us-east-1.emqxsl.com:8084/mqtt';
-
-      // Create an MQTT client instance
-      const options = {
-        // Clean session
-        clean: true,
-        connectTimeout: 4000,
-        // Authentication
-        clientId: 'emqxjs_' + Math.random().toString(16).substr(2, 8),
-        username: 'mqtt',
-        password: 'password',
-      };
-
-      const client = mqtt.connect(url, options);
-
-      client.on('connect', function () {
-        console.log('Connected');
-        // Subscribe to a topic
-        client.subscribe('test', function (err) {
-          if (!err) {
-            // Publish a message to a topic
-            console.log('Message is published');
-            client.publish('test', 'Hello mqtt from js');
-          }
-        });
-      });
-
-      // Receive messages
-      client.on('message', function (topic, message) {
-        const translate = message.toString();
-        console.log(translate);
-        let stringArray;
-        if (translate.includes('contador ')) {
-          stringArray = translate.split(/(\s+)/);
-          console.log(stringArray);
-          const contador = document.getElementById('counter');
-          contador.innerText = stringArray[2];
-        }
-        if (translate.includes('temp ')) {
-          stringArray = translate.split(/(\s+)/);
-          console.log(stringArray);
-          const temp = document.getElementById('temperature');
-          temp.innerText = stringArray[2] + ' °C';
-        }
-        if (translate.includes('hum ')) {
-          stringArray = translate.split(/(\s+)/);
-          console.log(stringArray);
-          const humd = document.getElementById('humidity');
-          humd.innerText = stringArray[2] + ' %';
-        }
-      });
-
-      onButton.addEventListener('click', () => {
-        body.style.backgroundImage =
-          "url('https://gifdb.com/images/high/kirby-blowing-air-wcalrq9zfsma8rbs.gif')";
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = '80%,10%'; // Adjusted background position
-        // Simulate LED deactivation
-        // Simulate LED activation
-        client.publish('test', JSON.stringify({ led: 1 }));
-      });
-
-      offButton.addEventListener('click', () => {
-        body.style.backgroundImage =
-          "url('https://i.pinimg.com/originals/5a/47/a2/5a47a293a2833ecdb5a22835cf21c8e5.gif')";
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = '80%,10%'; // Adjusted background position
-        // Simulate LED deactivation
-        client.publish('test', JSON.stringify({ led: 0 }));
-      });
-
-      const updateTemperature = () => {
-        client.publish('test', JSON.stringify({ temperature: 1 }));
-      };
-
-      const updateHumidity = () => {
-        client.publish('test', JSON.stringify({ humidity: 1 }));
-      };
-
-      // setInterval(updateCounter, 1000);
-      setInterval(updateTemperature, 5000);
-      setInterval(updateHumidity, 5000);
-    </script>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    let step = 10; // Puedes ajustar el valor del paso según tus necesidades
+    let labels = Array.from({ length: 24 }, (_, i) => i * step); // Crear etiquetas de tiempo con un paso
+
+    let temperatures = [86, 114, 106, 106, 107, 111, 133, 221, 783, 2478]; // Datos de temperatura (ajusta la cantidad según tus necesidades)
+    let humidities = [282, 350, 411, 502, 635, 809, 947, 1402, 3700, 5267]; // Datos de humedad (ajusta la cantidad según tus necesidades)
+
+    let chart = new Chart(document.getElementById('line-chart'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: temperatures,
+            label: 'Temperatura',
+            borderColor: '#3e95cd',
+            fill: false,
+          },
+          {
+            data: humidities,
+            label: 'Humudad',
+            borderColor: '#8e5ea2',
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'Temperatura y Humedad en la última hora',
+        },
+      },
+    });
+
+    function updateChart(labels, temperatures, humidities) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = temperatures;
+      chart.data.datasets[1].data = humidities;
+      chart.update();
+    }
+  </script>
+  <script src="mqtt.js"></script>
+  <script>
+    let PUB_TOPIC = 'monitores/web';
+    const url = 'wss://ue91a21d.ala.us-east-1.emqxsl.com:8084/mqtt';
+
+    // Create an MQTT client instance
+    const options = {
+      // Clean session
+      clean: true,
+      connectTimeout: 4000,
+      // Authentication
+      clientId: 'emqxjs_' + Math.random().toString(16).substr(2, 8),
+      username: 'mqtt',
+      password: 'password',
+    };
+
+    const client = mqtt.connect(url, options);
+
+    client.on('connect', function () {
+      console.log('Connected');
+      // Subscribe to a topic
+      client.subscribe(PUB_TOPIC, function (err) {
+        if (!err) {
+          // Publish a message to a topic
+          console.log('Message is published');
+          client.publish(PUB_TOPIC, 'Kirby Web');
+        }
+      });
+    });
+
+    // Receive messages
+    client.on('message', function (topic, message) {
+      try {
+        let data = JSON.parse(message.toString());
+        if (
+          data['from'] == 'esp32' &&
+          data['to'] == 'web' &&
+          data['action'] == 'SEND_DATA'
+        ) {
+          document.getElementById('temperature').innerText =
+            data['data']['temperature'] + '°C';
+          document.getElementById('humidity').innerText =
+            data['data']['humidity'] + '%';
+        }
+        if (
+          data['from'] == 'server' &&
+          data['to'] == 'web' &&
+          data['action'] == 'SEND_DATA'
+        ) {
+          updateChart(
+            data['data']['labels'],
+            data['data']['temperatures'],
+            data['data']['humidities']
+          );
+        }
+        if (
+          data['from'] == 'server' &&
+          data['to'] == 'web' &&
+          data['action'] == 'SEND_JOKE'
+        ) {
+          document.getElementById('joke').innerText = data['data']['joke'];
+        }
+        if (
+          data['from'] == 'esp32' &&
+          data['to'] == 'broadcast' &&
+          data['action'] == 'UPDATE_COUNTER'
+        ) {
+          document.getElementById('counter').innerHTML = data['value'];
+        }
+      } catch (e) {
+        console.log('No es un JSON');
+      }
+    });
+
+    const onButton = document.getElementById('onButton');
+    const offButton = document.getElementById('offButton');
+    const body = document.body;
+
+    onButton.addEventListener('click', () => {
+      body.style.backgroundImage =
+        "url('https://gifdb.com/images/high/kirby-blowing-air-wcalrq9zfsma8rbs.gif')";
+      body.style.backgroundSize = 'cover';
+      body.style.backgroundPosition = '80%,10%'; // Adjusted background position
+      // Simulate LED deactivation
+      // Simulate LED activation
+      client.publish(
+        PUB_TOPIC,
+        JSON.stringify({
+          from: 'web',
+          to: 'esp32',
+          action: 'led',
+          data: {
+            state: 1,
+          },
+        })
+      );
+    });
+
+    offButton.addEventListener('click', () => {
+      body.style.backgroundImage =
+        "url('https://i.pinimg.com/originals/5a/47/a2/5a47a293a2833ecdb5a22835cf21c8e5.gif')";
+      body.style.backgroundSize = 'cover';
+      body.style.backgroundPosition = '80%,10%'; // Adjusted background position
+      // Simulate LED deactivation
+      client.publish(
+        PUB_TOPIC,
+        JSON.stringify({
+          from: 'web',
+          to: 'esp32',
+          action: 'led',
+          data: {
+            state: 0,
+          },
+        })
+      );
+    });
+
+    document.getElementById('fetch_data').addEventListener('click', (e) => {
+      client.publish(
+        PUB_TOPIC,
+        JSON.stringify({
+          from: 'web',
+          to: 'server',
+          action: 'GET_DATA',
+        })
+      );
+    });
+
+    const get_joke = () => {
+      client.publish(
+        PUB_TOPIC,
+        JSON.stringify({
+          from: 'web',
+          to: 'server',
+          action: 'GET_JOKE',
+        })
+      );
+    };
+
+    get_joke();
+  </script>
 </html>
