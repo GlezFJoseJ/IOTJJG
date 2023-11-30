@@ -97,6 +97,9 @@
 
       document.getElementById('quality').addEventListener('change', (e) => {
         fetch(`http://192.168.185.14/control?var=framesize&val=${e.target.value}`);
+        if(e.target.value=='4'){
+          document.body.style.backgroundImage = `url('')`;
+        }
       });
 
       setStream();
