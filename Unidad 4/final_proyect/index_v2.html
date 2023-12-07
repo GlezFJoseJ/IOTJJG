@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="Recursos\css\incss.css" />
+    <title>Control Panel</title>
+    <style></style>
+  </head>
+  <!-- <body background="Recursos\img\bg.jpg"> -->
+  <body>
+    <header>
+      <h1>Control Panel</h1>
+    </header>
+
+    <section>
+      <audio id="audioPlayer" style="display: none">
+        <source src="Recursos\Sonido\ok.mp3" type="audio/mp3" />
+        Tu navegador no soporta el elemento de audio.
+      </audio>
+      <div id="videoBlock">
+        <h2>ESP32 CAM Video Stream</h2>
+        <figure>
+          <img id="videoStream" />
+        </figure>
+      </div>
+
+      <div class="derecha">
+        <div class="show-luminity">
+          <label for="">Luminosidad</label>
+          <p>1400</p>
+        </div>
+        <div class="options">
+          <div>
+            <label for="quality">Calidad de camara</label>
+            <select id="quality">
+              <option value="4">Baja</option>
+              <option value="6">Media</option>
+              <option value="8">Alta</option>
+            </select>
+          </div>
+          <div>
+            <label for="slider">Intensidad del led</label>
+            <input type="range" min="0" max="252" value="0" id="slider" />
+          </div>
+        </div>
+        <div>
+          <label for="">Tiempo de desplazamiento</label>
+          <input
+            type="number"
+            name=""
+            id="time"
+            min="200"
+            max="2000"
+            step="1"
+            value="1000"
+          />
+        </div>
+        <div id="MControl">
+          <div class="controlButton">
+            <!-- Add more buttons or content as needed -->
+          </div>
+          <div class="controlButton">
+            <button class="playAudioButton" id="forward">Adelante</button>
+          </div>
+          <div class="controlButton">
+            <!-- Add more buttons or content as needed -->
+          </div>
+          <div class="controlButton">
+            <button class="playAudioButton" id="left">Izquierda</button>
+          </div>
+          <div class="controlButton">
+            <!-- Add more buttons or content as needed -->
+          </div>
+          <div class="controlButton">
+            <button class="playAudioButton" id="right">Derecha</button>
+          </div>
+          <div class="controlButton">
+            <!-- Add more buttons or content as needed -->
+          </div>
+          <div class="controlButton">
+            <button class="playAudioButton" id="backward">Atras</button>
+          </div>
+          <div class="controlButton">
+            <!-- Add more buttons or content as needed -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-section">
+      <div>
+        <h2>Gráfica de luminosidad</h2>
+        <button id="fetch_data" class="ledButton">Solicitar datos</button>
+      </div>
+      <div class="chart_container">
+        <div class="sectionContainer">
+          <canvas id="line-chart" width="800" height="450"> </canvas>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      const playAudioButtons = document.querySelectorAll('.playAudioButton');
+      playAudioButtons.forEach((button) => {
+        button.addEventListener('click', reproducirAudio);
+      });
+
+      const setStream = () => {
+        const video = document.getElementById('videoStream');
+        const videoUrl = 'http://192.168.185.14:81/stream';
+        fetch('http://192.168.185.14/control?var=framesize&val=4');
+
+        video.src = videoUrl;
+      };
+
+      const setLedIntensity = (intensity) => {
+        fetch(
+          `http://192.168.185.14/control?var=led_intensity&val=${intensity}`
+        );
+      };
+
+      document.getElementById('slider').addEventListener('input', (e) => {
+        setLedIntensity(e.target.value);
+      });
+
+      document.getElementById('quality').addEventListener('change', (e) => {
+        fetch(
+          `http://192.168.185.14/control?var=framesize&val=${e.target.value}`
+        );
+      });
+
+      setStream();
+
+      const movRequest = (mov) => {
+        const time = document.getElementById('time').value;
+        console.log({ time });
+        fetch(`http://192.168.185.110/carro?mov=${mov}&time=${time}`, {
+          mode: 'cors',
+        });
+      };
+
+      document
+        .getElementById('forward')
+        .addEventListener('click', () => movRequest('adelante'));
+      document
+        .getElementById('backward')
+        .addEventListener('click', () => movRequest('atras'));
+      document
+        .getElementById('left')
+        .addEventListener('click', () => movRequest('izquierda'));
+      document
+        .getElementById('right')
+        .addEventListener('click', () => movRequest('derecha'));
+
+      document.getElementById('fetch_data').addEventListener('click', () => {
+        fetch('http://localhost:5000/luminosity_last_hour').then((response) => {
+          response.json().then((data) => {
+            console.log(data);
+            const labels = data.labels;
+            const luminities = data.luminities;
+            updateChart(labels, luminities);
+          });
+        });
+      });
+
+      // Función de reproducción de audio
+      function reproducirAudio() {
+        const audioPlayer = document.getElementById('audioPlayer');
+        audioPlayer.play().catch((error) => {
+          console.error('Error al reproducir audio:', error);
+        });
+      }
+
+      // Function to get the luminity
+      const getLuminity = () => {
+        fetch('http://localhost:5000/luminosity').then((response) => {
+          response.json().then((data) => {
+            const luminity = document.querySelector('.show-luminity p');
+            luminity.innerHTML = data.luminity;
+          });
+        });
+      };
+
+      // Set led slider in 100 if luminity is lower than 1300
+      const setLedSlider = () => {
+        const luminity = document.querySelector('.show-luminity p').innerHTML;
+        const slider = document.getElementById('slider');
+        if (luminity < 1300) {
+          setLedIntensity(100);
+        } else {
+          setLedIntensity(0);
+        }
+      };
+
+      // // Function to get the luminity every 2 seconds
+      setInterval(() => {
+        getLuminity();
+        setLedSlider();
+      }, 1000);
+    </script>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    let step = 10; // Puedes ajustar el valor del paso según tus necesidades
+    let labels = Array.from({ length: 24 }, (_, i) => i * step); // Crear etiquetas de tiempo con un paso
+
+    let luminities = [282, 350, 411, 502, 635, 809, 947, 1402, 3700, 5267]; // Datos de humedad (ajusta la cantidad según tus necesidades)
+
+    let chart = new Chart(document.getElementById('line-chart'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: luminities,
+            label: 'Luminosidad',
+            borderColor: '#8e5ea2',
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'Luminosidad en la última hora',
+        },
+      },
+    });
+
+    function updateChart(labels, luminities) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = luminities;
+      chart.update();
+    }
+  </script>
+</html>

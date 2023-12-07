@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESP32 CAM Video Stream</title>
+  </head>
+  <body>
+    <h1>ESP32 CAM Video Stream</h1>
+    <img id="videoStream" width="640" height="480" />
+
+    <button id="forward">Adelante</button>
+    <button id="backward">Atras</button>
+    <button id="left">Izquierda</button>
+    <button id="right">Derecha</button>
+
+    <!-- Slider that goes from 0 to 252 -->
+    <div>
+      <label for="">Intesidad</label>
+      <input type="range" min="0" max="252" value="0" id="slider" />
+    </div>
+    <!-- Set quality of stream as low, medium, high -->
+    <div>
+      <label for="">Calidad</label>
+      <select name="" id="quality">
+        <option value="4">Baja</option>
+        <option value="6">Media</option>
+        <option value="8">Alta</option>
+      </select>
+    </div>
+
+    <script>
+      const setStream = () => {
+        const video = document.getElementById('videoStream');
+        const videoUrl = 'http://192.168.185.14:81/stream';
+        fetch('http://192.168.185.14/control?var=framesize&val=4');
+
+        video.src = videoUrl;
+      };
+
+      // Function that sends the intensity of the led
+      const setLedIntensity = (intensity) => {
+        fetch(
+          `http://192.168.185.14/control?var=led_intensity&val=${intensity}"`
+        );
+      };
+
+      // Event that listens to the slider
+      document.getElementById('slider').addEventListener('input', (e) => {
+        setLedIntensity(e.target.value);
+      });
+
+      // Event that listens to the quality
+      document.getElementById('quality').addEventListener('change', (e) => {
+        fetch(
+          `http://192.168.185.14/control?var=framesize&val=${e.target.value}`
+        );
+      });
+
+      setStream();
+
+      const movRequest = (mov) => {
+        fetch(`http://192.168.185.110/carro?mov=${mov}&time=500`);
+      };
+
+      document
+        .getElementById('forward')
+        .addEventListener('click', () => movRequest('adelante'));
+      document
+        .getElementById('backward')
+        .addEventListener('click', () => movRequest('atras'));
+      document
+        .getElementById('left')
+        .addEventListener('click', () => movRequest('izquierda'));
+      document
+        .getElementById('right')
+        .addEventListener('click', () => movRequest('derecha'));
+    </script>
+  </body>
+</html>
